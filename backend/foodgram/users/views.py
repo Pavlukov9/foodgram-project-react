@@ -11,8 +11,6 @@ from .models import User
 from .serializers import FollowSerializer, UserSerializer
 from api.permissions import IsCurrentUserOrAdminOrReadOnly
 from recipes.models import Follow
-from users.models import User
-from users.serializers import FollowSerializer, UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
