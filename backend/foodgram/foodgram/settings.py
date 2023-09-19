@@ -2,7 +2,6 @@ import os
 
 from pathlib import Path
 
-from datetime import timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -77,13 +76,13 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 
 DATABASES = {
-     'default': {
-         'ENGINE': 'django.db.backends.sqlite3',
-         'NAME': BASE_DIR / 'db.sqlite3',
-     }
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
-#DATABASES = {
+# DATABASES = {
 #    'default': {
 #        'ENGINE': 'django.db.backends.postgresql',
 #        'NAME': os.getenv('POSTGRE_DB', 'django'),
@@ -91,8 +90,8 @@ DATABASES = {
 #        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
 #        'HOST': os.getenv('DB_HOST', 'db'),
 #        'PORT': os.getenv('DB_PORT', 5432)
- #   }
-#}
+#   }
+# }
 
 
 # Password validation

@@ -7,10 +7,12 @@ from rest_framework.permissions import IsAuthenticated
 from api.pagination import CustomPagination
 from django.shortcuts import get_object_or_404
 
+from .models import User
+from .serializers import FollowSerializer, UserSerializer
+from api.permissions import IsCurrentUserOrAdminOrReadOnly
 from recipes.models import Follow
 from users.models import User
 from users.serializers import FollowSerializer, UserSerializer
-from api.permissions import IsCurrentUserOrAdminOrReadOnly
 
 
 class UserViewSet(viewsets.ModelViewSet):

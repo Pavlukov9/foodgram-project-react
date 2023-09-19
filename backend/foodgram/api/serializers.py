@@ -11,7 +11,7 @@ from users.serializers import UserSerializer
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Список ингредиентов."""
-    
+
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
@@ -67,13 +67,13 @@ class RecipeListSerializer(serializers.ModelSerializer):
         fields = ('id', 'tags', 'author', 'ingredients',
                   'is_favorited', 'is_in_shopping_cart', 'name',
                   'image', 'text', 'cooking_time')
-    
+
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
         if not user.is_anonymous:
             return Favorite.objects.filter(recipe=obj).exists()
         return False
-    
+
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
         if not user.is_anonymous:
@@ -96,7 +96,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'author', 'ingredients', 'tags',
                   'image', 'name', 'text', 'cooking_time')
-        
+
     def validate_ingredients(self, value):
         ingredients = value
         if not ingredients:
@@ -108,19 +108,19 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             if ingredient in ingredients_list:
                 raise serializers.ValidationError(
                     {'ingredients': 'Ингридиенты повторяются!'})
-    
+
             if int(item['amount']) <= 0:
                 raise serializers.ValidationError(
                     'Количество ингредиентов должно быть больше нуля!'
                 )
             ingredients_list.append(ingredient)
-            
+
         tags = value
         if not tags:
             raise serializers.ValidationError(
                 'Нужен минимум один тег!'
             )
-        
+
         tags_list = []
         for tag in tags:
             if tag in tags_list:
@@ -128,15 +128,15 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
                     'Теги не должны повторяться!'
                 )
             tags_list.append(tag)
-        
+
         return value
-    
+
     def to_representation(self, instance):
         ingredients = super().to_representation(instance)
         ingredients['ingredients'] = RecipeIngridientSerializer(
             instance.recipeingredients.all(), many=True).data
         return ingredients
-    
+
     def add_tags_ingredients(self, ingredients, tags, model):
         for ingredient in ingredients:
             RecipeIngredient.objects.update_or_create(
@@ -144,14 +144,14 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
                 ingredient=ingredient['id'],
                 amount=ingredient['amount'])
         model.tags.set(tags)
-    
+
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         recipe = super().create(validated_data)
         self.add_tags_ingredients(ingredients, tags, recipe)
         return recipe
-    
+
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
@@ -182,7 +182,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source='recipe',
         read_only=True)
-    
+
     class Meta:
         model = Favorite
         fields = ('id', 'name', 'image', 'coocking_time')
@@ -190,7 +190,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
     """Сериализатор для списка покупок"""
-    
+
     name = serializers.ReadOnlyField(
         source='recipe.name',
         read_only=True)

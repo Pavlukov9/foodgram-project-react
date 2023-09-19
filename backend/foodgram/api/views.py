@@ -2,9 +2,8 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS
 
 from recipes.models import (Favorite, Ingredient, RecipeIngredient, Recipe,
@@ -48,12 +47,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     filterset_class = RecipeFilter
 
-
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
             return RecipeListSerializer
         return RecipeWriteSerializer
-
 
     @action(detail=True,
             methods=['post', 'delete'],
@@ -66,7 +63,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return post_delete_method(self, request, recipe,
                                   FavoriteSerializer, Favorite)
 
-
     @action(detail=True,
             methods=['post', 'delete'],
             permission_classes=[IsAuthenticated, ])
@@ -77,7 +73,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
         return post_delete_method(self, request, recipe,
                                   ShoppingCartSerializer, ShoppingCart)
-
 
     @action(detail=False,
             methods=['get'],
@@ -101,4 +96,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
         response['Content-Disposition'] = \
             'attachment; filename="shopping_cart.txt"'
         return response
-    

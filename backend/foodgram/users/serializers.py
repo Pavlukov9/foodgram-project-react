@@ -6,6 +6,7 @@ from recipes.models import Follow, Recipe
 from users.models import User
 import api.serializers
 
+
 class UserSerializer(serializers.ModelSerializer):
 
     """Сериализатор для работы с информацией о пользователях."""
@@ -17,13 +18,13 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('email', 'id',
                   'username', 'first_name',
                   'last_name', 'is_subscribed')
-        
+
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
         if not user.is_anonymous:
             return Follow.objects.filter(user=user, author=obj).exists()
         return False
-    
+
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
 
@@ -31,7 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
 class FollowSerializer(serializers.ModelSerializer):
 
     """Serializer для модели Follow."""
-    
+
     email = serializers.ReadOnlyField(source='author.email')
     id = serializers.ReadOnlyField(source='author.id')
     username = serializers.ReadOnlyField(source='author.username')
