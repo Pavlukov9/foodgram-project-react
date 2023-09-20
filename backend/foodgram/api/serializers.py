@@ -160,13 +160,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class RecipeMiniSerializer(serializers.ModelSerializer):
-    """Сериализатор предназначен для вывода рецептом в FollowSerializer."""
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'cooking_time', 'image',)
-
-
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор для избранного"""
 

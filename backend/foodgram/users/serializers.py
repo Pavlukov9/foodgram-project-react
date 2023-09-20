@@ -1,15 +1,14 @@
+from djoser.serializers import UserSerializer
 from rest_framework import serializers
-from rest_framework import status
-from rest_framework.exceptions import ValidationError
-
-from recipes.models import Follow, Recipe
-from users.models import User
-import api.serializers
 
 
-class UserSerializer(serializers.ModelSerializer):
+from recipes.models import Recipe
+from .models import User, Follow
 
-    """Сериализатор для работы с информацией о пользователях."""
+
+class UserSerializer(UserSerializer):
+
+    """Сериализатор для проверки подписан ли пользователь."""
 
     is_subscribed = serializers.SerializerMethodField()
 
@@ -21,62 +20,69 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
-        if not user.is_anonymous:
-            return Follow.objects.filter(user=user, author=obj).exists()
-        return False
+        if user.is_anonymous:
+            return False
+        else:
+            subscribe = Follow.objects.filter(user=user, author=obj).exists()
+            if subscribe:
+                return subscribe
+            else:
+                return False
 
-    def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+
+class RecipeMiniSerializer(serializers.ModelSerializer):
+    """Сериализатор предназначен для вывода рецептом в FollowSerializer."""
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'cooking_time', 'image',)
 
 
 class FollowSerializer(serializers.ModelSerializer):
 
-    """Serializer для модели Follow."""
+    """Serializer для модели Follow. Всё о подписки пользователя"""
 
-    email = serializers.ReadOnlyField(source='author.email')
-    id = serializers.ReadOnlyField(source='author.id')
-    username = serializers.ReadOnlyField(source='author.username')
-    first_name = serializers.ReadOnlyField(source='author.first_name')
-    last_name = serializers.ReadOnlyField(source='author.last_name')
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
-        model = Follow
+        model = User
         fields = ('email', 'id', 'username', 'first_name',
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count')
 
-    def get_is_subscribed(self, obj):
-        user = self.context.get('request').user
-        if not user.is_anonymous:
-            return Follow.objects.filter(
-                user=obj.user,
-                author=obj.author).exists()
-        return False
+    # Найдем кол-во рецептов и рецепты, на которые подписан пользователь.
+    def get_recipes_count(self, author):
+        return Recipe.objects.filter(author=author).count()
 
     def get_recipes(self, obj):
         request = self.context.get('request')
-        limit = request.GET.get('recipes_limit')
-        recipes = Recipe.objects.filter(author=obj.author)
-        if limit and limit.isdigit():
-            recipes = recipes[:int(limit)]
-        return api.serializers.RecipeMiniSerializer(recipes, many=True).data
+        recipes = obj.recipes.all()
+        recipes_limit = request.query_params.get('recipes_limit')
+        if recipes_limit:
+            recipes = recipes[:int(recipes_limit)]
+        return RecipeMiniSerializer(recipes, many=True).data
 
-    def get_recipes_count(self, obj):
-        return Recipe.objects.filter(author=obj.author).count()
+
+class FollowUserSerializer(serializers.ModelSerializer):
+
+    """Serializer для модели Follow.
+    Всё о подписки пользователя,связанное с пользователями."""
+
+    class Meta:
+        model = User
+        fields = fields = ('email', 'id', 'username', 'first_name',
+                           'last_name')
 
     def validate(self, data):
-        author = self.context.get('author')
         user = self.context.get('request').user
-        if Follow.objects.filter(
-                author=author,
-                user=user).exists():
-            raise ValidationError(
-                detail='Вы уже подписаны на этого пользователя!',
-                code=status.HTTP_400_BAD_REQUEST)
-        if user == author:
-            raise ValidationError(
-                detail='Невозможно подписаться на себя!',
-                code=status.HTTP_400_BAD_REQUEST)
+        result = Follow.objects.filter(author=data['author'],
+                                       user=user).exists()
+        if result:
+            raise serializers.ValidationError(
+                'Вы уже подписаны на этого пользователя!'
+            )
+        if user == data['author']:
+            raise serializers.ValidationError(
+                'Нельзя подписаться на самого себя!'
+            )
         return data
