@@ -1,23 +1,72 @@
-from django.db.models import Sum
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from django.shortcuts import get_object_or_404
+from djoser.views import UserViewSet
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        SAFE_METHODS, IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
 
-from recipes.models import (Favorite, Ingredient, RecipeIngredient, Recipe,
-                            ShoppingCart, Tag)
+
 from .filters import IngredientSearchFilter, RecipeFilter
+from .pagination import CustomPagination
 from .permissions import IsAdminAuthorOrReadOnly
+from recipes.models import (Favorite, Ingredient, Recipe,
+                            ShoppingCart, Tag)
+from .services import download_shopping_cart
 from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeWriteSerializer, RecipeListSerializer,
-                          ShoppingCartSerializer, TagSerializer)
-from .pagination import CustomPagination
+                          ShoppingCartSerializer, TagSerializer,
+                          FollowUserSerializer, FollowSerializer, UserSerializer)
+from users.models import User, Follow
 from .utils import post_delete_method
 
 
-class TagViewSet(viewsets.ModelViewSet):
+class CustomUserViewSet(UserViewSet):
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class UserViewSet(viewsets.ModelViewSet):
+
+    """Viewset для пользователя. """
+
+    queryset = User.objects.all()
+    permission_classes = (IsAdminAuthorOrReadOnly, )
+    serializer_class = UserSerializer
+    pagination_class = CustomPagination
+
+    @action(detail=True,
+            methods=['post', 'delete'],
+            serializer_class=FollowSerializer,
+            permission_classes=[IsAuthenticated])
+    def subscribe(self, request, *args, **kwargs):
+        author = get_object_or_404(User, id=self.kwargs.get('pk'))
+        if request.method == 'POST':
+            Follow.objects.create(user=request.user, author=author)
+            return Response(
+                self.serializer_class(author,
+                                      context={'request': request}).data,
+                status=status.HTTP_201_CREATED
+            )
+
+        if Follow.objects.filter(user=request.user, author=author).exists():
+            Follow.objects.get(user=request.user_id, author=author.id).delete()
+            return Response('Отписка прошла успешно',
+                            status=status.HTTP_204_NO_CONTENT)
+        return Response({'errors': 'Вы не подписаны на этого пользователя'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True,
+            methods=['post'],
+            serializer_class=FollowSerializer,
+            permission_classes=[IsAuthenticated])
+    def subscriptions(self):
+        return User.objects.filter(following__user=self.request.user.follower)
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
     """Вьюсет для работы с тегами."""
 
@@ -41,7 +90,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     """Вьюсет для работы с рецептами."""
 
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.all().select_related('author').prefetch_related('tags')
     permission_classes = (IsAdminAuthorOrReadOnly, )
     filter_backends = (DjangoFilterBackend, )
     pagination_class = CustomPagination
@@ -77,22 +126,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False,
             methods=['get'],
             permission_classes=[IsAuthenticated, ])
-    def download_chopping_cart(self, request):
+    def download_chopping_cart(self, request, author):
 
         """Отправка файла со списком покупок."""
 
-        ingredients = RecipeIngredient.objects.filter(
-            recipe__carts_user=request.user
-        ).values(
-            'ingredient__name', 'ingredient__measurement_unit'
-        ).annotate(ingredient_amount=Sum('amount'))
-        shopping_list = ['Список покупок:\n']
-        for ingredient in ingredients:
-            name = ingredient['ingredient__name']
-            unit = ingredient['ingredient__measurement_unit']
-            amount = ingredient['ingredient_amount']
-            shopping_list.append(f'\n{name} - {amount}, {unit}')
-        response = HttpResponse(shopping_list, content_type='text/plain')
-        response['Content-Disposition'] = \
-            'attachment; filename="shopping_cart.txt"'
-        return response
+        return download_shopping_cart(self, request, author)
