@@ -75,23 +75,23 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 
-#DATABASES = {
- #   'default': {
-  #      'ENGINE': 'django.db.backends.sqlite3',
- #       'NAME': BASE_DIR / 'db.sqlite3',
-  #  }
-#}
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRE_DB', 'django'),
-        'USER': os.getenv('POSTGRES_USER', 'django'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', 'db_foodgram'),
-        'PORT': os.getenv('DB_PORT', 5432)
-   }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
+
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': os.getenv('POSTGRE_DB', 'django'),
+#        'USER': os.getenv('POSTGRES_USER', 'django'),
+#        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+#        'HOST': os.getenv('DB_HOST', 'db_foodgram'),
+#        'PORT': os.getenv('DB_PORT', 5432)
+#   }
+#}
 
 
 # Password validation

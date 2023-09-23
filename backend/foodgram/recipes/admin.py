@@ -35,7 +35,8 @@ class RecipeAdmin(admin.ModelAdmin):
         RecipeIngredientInline,
     ]
 
-    def favorites_amount(self, obj):
+    @staticmethod
+    def favorites_amount(obj):
         return obj.favorites.count()
 
 
