@@ -6,10 +6,11 @@ from django.http import FileResponse
 from recipes.models import RecipeIngredient
 
 
-def download_shopping_cart(self, request, author):
+def download_shopping_cart_(self, request):
     """Скачивание списка продуктов для выбранных рецептов пользователя."""
+    author = request.user
     sum_ingredients_in_recipes = RecipeIngredient.objects.filter(
-        recipe__shopping_cart__author=author
+        recipe__carts__author=author
     ).values(
         'ingredient__name', 'ingredient__measurement_unit'
     ).annotate(

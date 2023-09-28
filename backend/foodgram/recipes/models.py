@@ -41,7 +41,6 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
-
 class Ingredient(models.Model):
     name = models.CharField(
         'Название ингредиента',
@@ -57,6 +56,12 @@ class Ingredient(models.Model):
         ordering = ['name']
         verbose_name = 'Ингредиент',
         verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_name_measurement_unit'
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -145,6 +150,12 @@ class RecipeIngredient(models.Model):
     class Meta:
         verbose_name = 'Ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецепте'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique_recipe_ingredient'
+            )
+        ]
 
 
 #class FavoriteShoppingCart(models.Model):
@@ -182,6 +193,12 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_user_recipe'
+            )
+        ]
 
     def __str__(self):
         return f'{self.user.username} добавил {self.recipe.name} в избранное.'
