@@ -246,9 +246,8 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class FavoriteShoppingCartSerializer(serializers.ModelSerializer):
-
-    """ Базовый сериализатор для избранного и списка покупок"""
+class FavoriteSerializer(serializers.ModelSerializer):
+    """Сериализатор для избранного"""
 
     name = serializers.ReadOnlyField(
         source='recipe.name',
@@ -263,43 +262,26 @@ class FavoriteShoppingCartSerializer(serializers.ModelSerializer):
         source='recipe',
         read_only=True)
 
-
-class FavoriteSerializer(FavoriteShoppingCartSerializer):
-    """Сериализатор для избранного"""
-
-#    name = serializers.ReadOnlyField(
- #       source='recipe.name',
- #       read_only=True)
- #   image = serializers.ImageField(
- #       source='recipe.image',
- #       read_only=True)
-  #  coocking_time = serializers.IntegerField(
-  #      source='recipe.cooking_time',
- #       read_only=True)
- #   id = serializers.PrimaryKeyRelatedField(
- #       source='recipe',
-  #      read_only=True)
-
     class Meta:
         model = Favorite
         fields = ('id', 'name', 'image', 'coocking_time')
 
 
-class ShoppingCartSerializer(FavoriteShoppingCartSerializer):
+class ShoppingCartSerializer(serializers.ModelSerializer):
     """Сериализатор для списка покупок"""
 
- #   name = serializers.ReadOnlyField(
-  #      source='recipe.name',
- #       read_only=True)
-  #  image = serializers.ImageField(
- #       source='recipe.image',
- #       read_only=True)
- #   coocking_time = serializers.IntegerField(
-  #      source='recipe.cooking_time',
-  #      read_only=True)
-  #  id = serializers.PrimaryKeyRelatedField(
- #       source='recipe',
- #       read_only=True)
+    name = serializers.ReadOnlyField(
+        source='recipe.name',
+        read_only=True)
+    image = serializers.ImageField(
+        source='recipe.image',
+        read_only=True)
+    coocking_time = serializers.IntegerField(
+        source='recipe.cooking_time',
+        read_only=True)
+    id = serializers.PrimaryKeyRelatedField(
+        source='recipe',
+        read_only=True)
 
     class Meta:
         model = ShoppingCart
