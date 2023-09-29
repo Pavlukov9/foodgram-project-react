@@ -8,11 +8,11 @@ from users.models import User
 
 class Tag(models.Model):
 
-    #COLOR_PALETTE = [
-    #    ('#00ff00', 'green'),
-    #    ('#ffff00', 'yellow'),
-    #    ('#ff0000', 'red')
-    #]
+    COLOR_PALETTE = [
+        ('#00ff00', 'green'),
+        ('#ffff00', 'yellow'),
+        ('#ff0000', 'red')
+    ]
 
     name = models.CharField(
         'Название',
@@ -20,9 +20,9 @@ class Tag(models.Model):
         blank=False,
         unique=True
     )
-    color = models.CharField(
+    color = ColorField(
         'Цвет',
-        #choices=COLOR_PALETTE,
+        choices=COLOR_PALETTE,
         max_length=constants.LENGTH_TAG_COLOR,
         blank=False,
         unique=True
@@ -40,6 +40,7 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Ingredient(models.Model):
     name = models.CharField(
@@ -108,7 +109,7 @@ class Recipe(models.Model):
             ),
             MaxValueValidator(
                 180, 'Время приготовления не может быть больше 180 минут.'
-            )    
+            )
         ]
     )
 
@@ -156,23 +157,6 @@ class RecipeIngredient(models.Model):
                 name='unique_recipe_ingredient'
             )
         ]
-
-
-#class FavoriteShoppingCart(models.Model):
- #   user = models.ForeignKey(
- #       User,
- #       on_delete=models.CASCADE,
- #       related_name='favorites',
- #       verbose_name='Пользователь',
- #       null=True
- #   )
- #   recipe = models.ForeignKey(
- #       Recipe,
- #       on_delete=models.CASCADE,
- #       related_name='favorites',
- #       verbose_name='Рецепт',
- #       null=True
-  #  )
 
 
 class Favorite(models.Model):

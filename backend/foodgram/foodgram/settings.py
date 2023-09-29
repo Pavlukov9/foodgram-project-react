@@ -17,10 +17,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', default=' ')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = os.getenv('DEBUG', default='False')
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DEBUG', default='False')
 
-ALLOWED_HOSTS = ['158.160.2.214', '*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='').split()
 
 
 # Application definition
@@ -84,9 +83,8 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'django'),
         'HOST': os.getenv('DB_HOST', 'db'),
         'PORT': os.getenv('DB_PORT', 5432)
-   }
+    }
 }
-
 
 
 # Password validation
@@ -152,12 +150,8 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        #'set_password': 'djoser.serializers.SetPasswordSerializer',
-        #'user_create': 'api.serializers.UserSignUpSerializer',
         'user': 'api.serializers.UserSerializer',
         'current_user': 'api.serializers.UserSerializer',
-        #'token': 'djoser.serializers.TokenSerializer',
-        #'token_create': 'djoser.serializers.TokenCreateSerializer',
     },
     'PERMISSIONS': {
         'user_list': ['rest_framework.permissions.AllowAny'],

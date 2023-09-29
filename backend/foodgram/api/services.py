@@ -1,29 +1,33 @@
-from datetime import date
+import datetime
 
 from django.db.models import Sum
 from django.http import FileResponse
+from rest_framework import status
+from rest_framework.response import Response
 
 from recipes.models import RecipeIngredient
 
 
 def download_shopping_cart_(self, request):
-    """Скачивание списка продуктов для выбранных рецептов пользователя."""
-    author = request.user
-    sum_ingredients_in_recipes = RecipeIngredient.objects.filter(
-        recipe__carts__author=author
+    user = request.user
+    if not user.carts.exists():
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    ingredients = RecipeIngredient.objects.filter(
+        recipe__carts__user=request.user
     ).values(
-        'ingredient__name', 'ingredient__measurement_unit'
-    ).annotate(
-        amounts=Sum('amount', distinct=True)).order_by('amounts')
-    today = date.today().strftime("%d-%m-%Y")
+        'ingredient__name',
+        'ingredient__measurement_unit'
+    ).annotate(cart_amount=Sum('amount'))
+
+    today = datetime.today()
     shopping_list = f'Список покупок на: {today}\n\n'
-    for ingredient in sum_ingredients_in_recipes:
+    for ingredient in ingredients:
         shopping_list += (
             f'{ingredient["ingredient__name"]} - '
-            f'{ingredient["amounts"]} '
+            f'{ingredient["cart_amount"]} '
             f'{ingredient["ingredient__measurement_unit"]}\n'
         )
-    shopping_list += f'\n\nFoodgram ({today})'
-    filename = 'shopping_list.txt'
-    response = FileResponse(open(filename, 'rb'))
+    shopping_list += f'\n\nFoodgram ({today:%Y})'
+    response = FileResponse(shopping_list, content_type='text/plain')
     return response

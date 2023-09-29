@@ -1,25 +1,15 @@
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import FilterSet, filters
 
-from recipes.models import Ingredient, Recipe, Tag
+from recipes.models import Ingredient, Recipe
 
 
 User = get_user_model()
 
 
-class IngredientSearchFilter(FilterSet):
-    name = filters.CharFilter(lookup_expr='startswith')
-
-    class Meta:
-        model = Ingredient
-        fields = ('name',)
-
-
 class RecipeFilter(FilterSet):
     tags = filters.ModelMultipleChoiceFilter(
-        field_name='tags__slug',
-        to_field_name='slug',
-        queryset=Tag.objects.all(),
+        field_name='tags__slug'
     )
 
     is_favorited = filters.BooleanFilter(
@@ -45,3 +35,11 @@ class RecipeFilter(FilterSet):
         if value and not user.is_anonymous:
             return queryset.filter(carts__user=user)
         return queryset
+
+
+class IngredientSearchFilter(FilterSet):
+    name = filters.CharFilter(lookup_expr='startswith')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)
