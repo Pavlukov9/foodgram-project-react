@@ -89,7 +89,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     """Вьюсет для работы с рецептами."""
 
-    queryset = Recipe.objects.all().select_related('author').prefetch_related('tags')
+    queryset = Recipe.objects.all().select_related(
+        'author').prefetch_related('tags')
     permission_classes = (IsAdminAuthorOrReadOnly, )
     filter_backends = (DjangoFilterBackend, )
     pagination_class = CustomPagination

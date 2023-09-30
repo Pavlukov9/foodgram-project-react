@@ -18,7 +18,6 @@ SECRET_KEY = os.getenv('SECRET_KEY', default=' ')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-#DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
@@ -77,7 +76,7 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 
 DATABASES = {
-   'default': {
+    'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('POSTGRE_DB', 'django'),
         'USER': os.getenv('POSTGRES_USER', 'django'),
