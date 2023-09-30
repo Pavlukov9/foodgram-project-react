@@ -20,7 +20,7 @@ def download_shopping_cart_(self, request):
         'ingredient__measurement_unit'
     ).annotate(cart_amount=Sum('amount'))
 
-    today = datetime.today()
+    today = datetime.datetime.now().strftime('%Y-%m-%d')
     shopping_list = f'Список покупок на: {today}\n\n'
     for ingredient in ingredients:
         shopping_list += (
@@ -28,6 +28,6 @@ def download_shopping_cart_(self, request):
             f'{ingredient["cart_amount"]} '
             f'{ingredient["ingredient__measurement_unit"]}\n'
         )
-    shopping_list += f'\n\nFoodgram ({today:%Y})'
+    shopping_list += f'\n\nFoodgram ({today})'
     response = FileResponse(shopping_list, content_type='text/plain')
     return response

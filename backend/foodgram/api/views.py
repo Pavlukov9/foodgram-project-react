@@ -49,12 +49,19 @@ class CustomUserViewSet(UserViewSet):
         return Response({'errors': 'Вы не подписаны на этого пользователя'},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True,
-            methods=['post'],
-            serializer_class=FollowSerializer,
+    @action(detail=False,
+            methods=['get'],
             permission_classes=[IsAuthenticated])
-    def subscriptions(self):
-        return User.objects.filter(following__user=self.request.user.follower)
+    def subscriptions(self, request):
+        user = request.user
+        queryset = User.objects.filter(followed__user=user)
+        pages = self.paginate_queryset(queryset)
+        serializer = FollowSerializer(
+            pages,
+            many=True,
+            context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -82,8 +89,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     """Вьюсет для работы с рецептами."""
 
-    queryset = Recipe.objects.all().select_related(
-        'author').prefetch_related('tags')
+    queryset = Recipe.objects.all().select_related('author').prefetch_related('tags')
     permission_classes = (IsAdminAuthorOrReadOnly, )
     filter_backends = (DjangoFilterBackend, )
     pagination_class = CustomPagination
