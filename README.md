@@ -21,34 +21,56 @@
 
 1. Склонировать репозиторий на Ваш компьютер:
 
-``` https://github.com/Pavlukov9/foodgram-project-react.git ```
+``` 
+https://github.com/Pavlukov9/foodgram-project-react.git 
+```
 
 2. Создать и активировать виртуальное окружение:
 
-``` python -m venv venv ```
-``` source venv/Scripts/activate ```
+``` 
+python -m venv venv 
+```
+```
+ source venv/Scripts/activate
+  ```
 
 3. Установить зависимости:
 
-``` pip install -r requirements.txt ```
+``` 
+pip install -r requirements.txt
+```
 
 4. Выполнить миграции:
 
-``` python3 manage.py migrate ```
+``` 
+python3 manage.py migrate
+```
 
 5. Запустить проект локально:
 
-``` python manage.py runserver ``
+``` 
+python manage.py runserver 
+```
 
 ## Запустить проект на сервере:
 
 1. Установить на сервер Docker и Docker-compose:
 
-``` sudo apt update ```
-``` sudo apt install curl ```
-``` sudo -fSL https://get.docker.com -o get-docker.sh ```
-``` sudo sh ./get-docker.sh ```
-``` sudo apt-get install docker-compose-plugin ```
+``` 
+sudo apt update
+ ```
+``` 
+sudo apt install curl 
+```
+```
+sudo -fSL https://get.docker.com -o get-docker.sh 
+```
+``` 
+sudo sh ./get-docker.sh 
+```
+``` 
+sudo apt-get install docker-compose-plugin 
+```
 
 2. Скопировать на сервер файлы `docker-compose.yml`, `nginx.conf` и `.env`.
 
@@ -80,15 +102,23 @@ TELEGRAM_TOKEN= # (ID бота в Telegram)
 
 5. Выполнить в терминате команды:
 
-``` git add . ```
-``` git commit -m "<Название коммита>" ```
-``` git push ```
+``` 
+git add . 
+```
+``` 
+git commit -m "<Название коммита>" 
+```
+``` 
+git push 
+```
 
 6. При успешном исходе, Вам придет сообщение в Telegram о том, что деплой выполнен успешно.
 
 7. После этого нужно создать суперпользователя:
 
-``` sudo docker compose exec backend python manage.py createsuperuser```
+``` 
+sudo docker compose exec backend python manage.py createsuperuser
+```
 
 ## Документация к API:
 
