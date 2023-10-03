@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     def import_ingredients(self, file='ingredients.csv'):
         self.stdout.write(f'Загрузка данных из {file}')
-        with open('./data/{file}', newline='', encoding='utf-8') as f:
+        with open(f'./data/{file}', newline='', encoding='utf-8') as f:
             reader = csv.reader(f)
             for row in reader:
                 name, measurement_unit = row
