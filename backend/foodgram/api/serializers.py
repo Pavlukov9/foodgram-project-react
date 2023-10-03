@@ -263,7 +263,7 @@ class FavoriteShoppingCartSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source='recipe',
         read_only=True)
-    
+
 
 class FavoriteSerializer(FavoriteShoppingCartSerializer):
     """Сериализатор для избранного."""

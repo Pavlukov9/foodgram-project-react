@@ -1,4 +1,3 @@
-from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
@@ -14,11 +13,11 @@ class Tag(models.Model):
         blank=False,
         unique=True
     )
-    color = models.CharField( 
-        'Цвет', 
-        max_length=7, 
-        blank=False, 
-        unique=True 
+    color = models.CharField(
+        'Цвет',
+        max_length=7,
+        blank=False,
+        unique=True
     )
     slug = models.SlugField(
         'Слаг',
