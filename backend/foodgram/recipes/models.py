@@ -8,24 +8,17 @@ from users.models import User
 
 class Tag(models.Model):
 
-    COLOR_PALETTE = [
-        ('#00ff00', 'green'),
-        ('#ffff00', 'yellow'),
-        ('#ff0000', 'red')
-    ]
-
     name = models.CharField(
         'Название',
         max_length=constants.LENGTH_TAG_NAME,
         blank=False,
         unique=True
     )
-    color = ColorField(
-        'Цвет',
-        choices=COLOR_PALETTE,
-        max_length=constants.LENGTH_TAG_COLOR,
-        blank=False,
-        unique=True
+    color = models.CharField( 
+        'Цвет', 
+        max_length=7, 
+        blank=False, 
+        unique=True 
     )
     slug = models.SlugField(
         'Слаг',
@@ -45,8 +38,7 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(
         'Название ингредиента',
-        max_length=constants.LENGTH_INGREDIENT_NAME,
-        blank=False
+        max_length=constants.LENGTH_INGREDIENT_NAME
     )
     measurement_unit = models.CharField(
         'Единица измерения',
@@ -77,29 +69,24 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         'Название рецепта',
-        max_length=constants.LENGTH_RECIPE_NAME,
-        blank=False
+        max_length=constants.LENGTH_RECIPE_NAME
     )
     image = models.ImageField(
         'Картинка',
-        upload_to='media/',
-        blank=False
+        upload_to='media/'
     )
     text = models.CharField(
         'Описание рецепта',
-        max_length=constants.LENGTH_RECIPE_TEXT,
-        blank=False
+        max_length=constants.LENGTH_RECIPE_TEXT
     )
     ingredients = models.ManyToManyField(
         Ingredient,
         through='RecipeIngredient',
-        verbose_name='Ингредиенты',
-        blank=False
+        verbose_name='Ингредиенты'
     )
     tags = models.ManyToManyField(
         Tag,
-        verbose_name='Теги',
-        blank=False
+        verbose_name='Теги'
     )
     cooking_time = models.PositiveSmallIntegerField(
         'Время приготовления',
@@ -149,6 +136,7 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
+        ordering = ['recipe']
         verbose_name = 'Ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецепте'
         constraints = [
@@ -175,6 +163,7 @@ class Favorite(models.Model):
     )
 
     class Meta:
+        ordering = ['user']
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
         constraints = [
@@ -204,6 +193,7 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
+        ordering = ['user']
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Список покупок'
 

@@ -46,6 +46,7 @@ class Follow(models.Model):
     )
 
     class Meta:
+        ordering = ['user']
         verbose_name = 'Мои подписки'
         verbose_name_plural = 'Мои подписки'
         constraints = [

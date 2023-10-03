@@ -23,6 +23,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
+    min_num = 1
 
 
 @admin.register(Recipe)
@@ -30,10 +31,10 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'author', 'favorites_amount')
     search_fields = ('name', 'author')
     list_filter = ('name', 'author', 'tags')
+    filter_horizontal = ('ingredients',)
     empty_value_display = settings.EMPTY_VALUE
-    inlines = [
-        RecipeIngredientInline,
-    ]
+    inlines = (RecipeIngredientInline,)
+    save_as = True
 
     @staticmethod
     def favorites_amount(obj):
@@ -43,6 +44,8 @@ class RecipeAdmin(admin.ModelAdmin):
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
     list_display = ('id', 'recipe', 'ingredient', 'amount')
+    list_filter = ('recipe', 'ingredient')
+    search_fields = ('name',)
     empty_value_display = settings.EMPTY_VALUE
 
 

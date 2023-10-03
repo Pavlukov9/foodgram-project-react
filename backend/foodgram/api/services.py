@@ -20,7 +20,7 @@ def download_shopping_cart_(self, request):
         'ingredient__measurement_unit'
     ).annotate(cart_amount=Sum('amount'))
 
-    today = datetime.datetime.now().strftime('%Y-%m-%d')
+    today = datetime.datetime.now().strftime('%d-%m-%Y')
     shopping_list = f'Список покупок на: {today}\n\n'
     for ingredient in ingredients:
         shopping_list += (

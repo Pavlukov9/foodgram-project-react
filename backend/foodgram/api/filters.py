@@ -8,10 +8,8 @@ User = get_user_model()
 
 
 class RecipeFilter(FilterSet):
-    tags = filters.ModelMultipleChoiceFilter(
-        field_name='tags__slug',
-        to_field_name='slug',
-        queryset=Tag.objects.all(),
+    tags = filters.AllValuesMultipleFilter(
+        field_name='tags__slug'
     )
 
     is_favorited = filters.BooleanFilter(
@@ -40,7 +38,7 @@ class RecipeFilter(FilterSet):
 
 
 class IngredientSearchFilter(FilterSet):
-    name = filters.CharFilter(lookup_expr='startswith')
+    name = filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Ingredient

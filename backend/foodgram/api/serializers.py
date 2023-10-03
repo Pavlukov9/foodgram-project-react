@@ -23,8 +23,10 @@ class UserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
-        return (not user.is_anonymous
-                and Follow.objects.filter(user=user, author=obj.id).exists())
+        return (
+            user.is_authenticated
+            and Follow.objects.filter(user=user, author=obj.id).exists()
+        )
 
 
 class FollowSerializer(UserSerializer):
@@ -42,7 +44,7 @@ class FollowSerializer(UserSerializer):
 
     # Найдем кол-во рецептов и рецепты, на которые подписан пользователь.
     def get_recipes_count(self, author):
-        return Recipe.objects.filter(author=author).count()
+        return author.recipes.count()
 
     def get_recipes(self, obj):
         request = self.context.get('request')
@@ -218,10 +220,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return value
 
     def to_representation(self, instance):
-        ingredients = super().to_representation(instance)
-        ingredients['ingredients'] = RecipeIngridientSerializer(
-            instance.recipeingredients.all(), many=True).data
-        return ingredients
+        request = self.context.get('request')
+        context = {'request': request}
+        return RecipeListSerializer(instance, context=context).data
 
     @staticmethod
     def add_tags_ingredients(ingredients, tags, model):
@@ -247,8 +248,8 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class FavoriteSerializer(serializers.ModelSerializer):
-    """Сериализатор для избранного"""
+class FavoriteShoppingCartSerializer(serializers.ModelSerializer):
+    """Общий сериализатор для избранного и списка покупок. """
 
     name = serializers.ReadOnlyField(
         source='recipe.name',
@@ -262,27 +263,18 @@ class FavoriteSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source='recipe',
         read_only=True)
+    
+
+class FavoriteSerializer(FavoriteShoppingCartSerializer):
+    """Сериализатор для избранного."""
 
     class Meta:
         model = Favorite
         fields = ('id', 'name', 'image', 'coocking_time')
 
 
-class ShoppingCartSerializer(serializers.ModelSerializer):
-    """Сериализатор для списка покупок"""
-
-    name = serializers.ReadOnlyField(
-        source='recipe.name',
-        read_only=True)
-    image = serializers.ImageField(
-        source='recipe.image',
-        read_only=True)
-    coocking_time = serializers.IntegerField(
-        source='recipe.cooking_time',
-        read_only=True)
-    id = serializers.PrimaryKeyRelatedField(
-        source='recipe',
-        read_only=True)
+class ShoppingCartSerializer(FavoriteShoppingCartSerializer):
+    """Сериализатор для списка покупок."""
 
     class Meta:
         model = ShoppingCart
