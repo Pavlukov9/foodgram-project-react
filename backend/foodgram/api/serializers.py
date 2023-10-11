@@ -9,7 +9,7 @@ from users.models import User, Follow
 from .utils import Base64ImageField
 
 
-class UserSerializer(UserSerializer):
+class UserSerializer(serializers.ModelSerializer):
 
     """Сериализатор для проверки подписан ли пользователь."""
 
@@ -25,7 +25,7 @@ class UserSerializer(UserSerializer):
         user = self.context.get('request').user
         return (
             user.is_authenticated
-            and Follow.objects.filter(user=user, author=obj.id).exists()
+            and obj.followed.filter(user=user).exists()
         )
 
 
@@ -42,7 +42,6 @@ class FollowSerializer(UserSerializer):
         fields = ('email', 'id', 'username', 'first_name',
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count')
 
-    # Найдем кол-во рецептов и рецепты, на которые подписан пользователь.
     def get_recipes_count(self, author):
         return author.recipes.count()
 
@@ -66,8 +65,7 @@ class FollowUserSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         user = self.context.get('request').user
-        result = Follow.objects.filter(author=data.follower,
-                                       user=user).exists()
+        result = user.follower.filter(author=data.follower).exists()
         if result:
             raise serializers.ValidationError(
                 'Вы уже подписаны на этого пользователя!'
@@ -147,7 +145,7 @@ class AddIngredientSerializer(serializers.ModelSerializer):
 
     def validate_amount(self, value):
         amount = value
-        if amount <= 0:
+        if amount == 0:
             raise serializers.ValidationError(
                 'Количество ингредиентов должно быть больше нуля!'
             )

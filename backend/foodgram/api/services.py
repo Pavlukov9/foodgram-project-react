@@ -18,7 +18,7 @@ def download_shopping_cart_(self, request):
     ).values(
         'ingredient__name',
         'ingredient__measurement_unit'
-    ).annotate(cart_amount=Sum('amount'))
+    ).annotate(cart_amount=Sum('amount')).order_by('cart_amount')
 
     today = datetime.datetime.now().strftime('%d-%m-%Y')
     shopping_list = f'Список покупок на: {today}\n\n'

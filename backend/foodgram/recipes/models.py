@@ -1,4 +1,6 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import (RegexValidator,
+                                    MinValueValidator,
+                                    MaxValueValidator)
 from django.db import models
 
 import constants
@@ -17,7 +19,13 @@ class Tag(models.Model):
         'Цвет',
         max_length=7,
         blank=False,
-        unique=True
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex="^#([a-f0-9]{6}|[a-f0-9]{3})$",
+                message='Неправильный формат ввода',
+            )
+        ]
     )
     slug = models.SlugField(
         'Слаг',
@@ -81,7 +89,7 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through='RecipeIngredient',
-        verbose_name='Ингредиенты'
+        verbose_name='Ингредиенты',
     )
     tags = models.ManyToManyField(
         Tag,
@@ -146,22 +154,27 @@ class RecipeIngredient(models.Model):
         ]
 
 
-class Favorite(models.Model):
+class FavoriteShoppingCart(models.Model):
 
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favorites',
         verbose_name='Пользователь',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favorites',
         verbose_name='Рецепт',
     )
 
     class Meta:
+        abstract = True
+
+
+class Favorite(FavoriteShoppingCart):
+
+    class Meta:
+        default_related_name = 'favorites'
         ordering = ['user']
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
@@ -176,22 +189,10 @@ class Favorite(models.Model):
         return f'{self.user.username} добавил {self.recipe.name} в избранное.'
 
 
-class ShoppingCart(models.Model):
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='carts',
-        verbose_name='Пользователь',
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='carts',
-        verbose_name='Рецепт',
-    )
+class ShoppingCart(FavoriteShoppingCart):
 
     class Meta:
+        default_related_name = 'carts'
         ordering = ['user']
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Список покупок'
