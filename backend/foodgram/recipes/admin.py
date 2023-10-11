@@ -29,7 +29,7 @@ class InlineFormset(BaseInlineFormSet):
             form.cleaned_data.get('DELETE') for form in self.forms
         )
         if all_forms_deleted:
-            raise ValidationError('Нельзя удалять!')
+            raise ValidationError('Нельзя удалять все ингредиенты!')
 
 
 class RecipeIngredientInline(admin.TabularInline):
